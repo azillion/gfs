@@ -52,7 +52,7 @@ func main() {
 		panic(err)
 	}
 
-	diff := start.Sub(end)
+	diff := end.Sub(start)
 	days := diff.Hours() / 24
 	if days < 1.0 {
 		days = 1.0
