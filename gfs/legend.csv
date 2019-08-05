@@ -1,0 +1,77 @@
+4LFTX,Best (4-layer) lifted index
+5WAVH,5-wave geopotential height
+ABSV,Absolute vorticity
+ACPCP,Convective precipitation
+ALBDO,Albedo
+APCP,Total precipitation
+CAPE,Convective Available Potential Energy
+CFRZR,Categorical freezing rain
+CICEP,Categorical_ice_pellets
+CIN,Convective_inhibition
+CLWMR,Cloud_mixing_ratio
+CPOFP,Percent of frozen precipitation
+CPRAT,Convective Precipitation rate
+CRAIN,Categorical_Rain
+CSNOW,Categorical_snow
+CWAT,Cloud_water
+CWORK,Cloud_work_function
+DLWRF,Downward longwave radiation flux
+DPT,Dew_point_temperature
+DSWRF,Downward shortwave radiation flux
+DZDT,Vertical_velocity,It apparently shows up twice
+FLDCP,Field_capacity
+GFLUX,Ground_Heat_Flux
+GRLE,Graupel
+GUST,Wind_speed_gust
+HGT,Geopotential_height
+HINDEX,Haines Index
+HLCY,Storm relative helicity
+HPBL,Planetary boundary layer height
+ICAHT,ICAO Standard Atmosphere Reference Height
+ICEC,Ice_cover
+ICMR,Ice mixing ratio
+ICSEV,Icing severity
+LAND,Land_cover,
+LFTX,Surface lifted index
+LHTFL,Latent heat net flux
+MSLET,Mean Sea Level Pressure (NAM Model Reduction)
+O3MR,Ozone mixing ratio
+PEVPR,Potential evaporation rate
+PLPL,Pressure of level from which parcel was lifted
+POT,Potential temperature
+PRATE,Precipitation_rate
+PRES,Pressure
+PRMSL,Pressure reduced to MSL
+PWAT,Precipitable_water
+REFC,Maximum/Composite radar reflectivity
+RH,Relative_humidity
+RWMR,Rain_mixing_ratio
+SHTFL,Sensible heat net flux
+SNMR,Snow_mixing_ratio
+SNOD,Snow_depth
+SOILW,Volumetric soil moisture (frozen + liquid) 
+SPFH,Specific_humidity
+SUNSD,Sunshine_duration
+TCDC,Total_cloud_cover
+TMAX,Maximum temperature
+TMIN,Minimum temperature
+TMP,Temperature
+TOZNE,Total_ozone
+TSOIL,Soil_temperature
+UFLX,Momentum flux, u component
+UGRD,u-component of wind
+U-GWD,Zonal flux of gravity wave stress
+ULWRF,upward long wave rad. flux
+USTM,u-component of storm motion
+USWRF,upward short wave rad. flux
+VFLX,Momentum flux, v component
+VGRD,v-component of wind
+V-GWD,Meridional flux of gravity wave stress
+VIS,Visibility
+VRATE,Ventilation Rate
+VSTM,v-component of storm motion
+VVEL,Vertical_velocity,It apparently shows up twice
+VWSH,Vertical speed shear
+WATR,Water_runoff
+WEASD,Water equiv. of accum. snow depth
+WILT,Wilting_Point
