@@ -23,7 +23,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -39,7 +38,8 @@ var getCmd = &cobra.Command{
 	Long:  `Download files from NOMADS`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("requires a data source argument")
+			// return errors.New("requires a data source argument")
+			return nil
 		}
 		if strings.EqualFold("ncep", args[0]) {
 			return nil
@@ -47,8 +47,13 @@ var getCmd = &cobra.Command{
 		return fmt.Errorf("invalid data source specified: %s", args[0])
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if strings.EqualFold("ncep", args[0]) {
-			fmt.Println("ncep called")
+		var firstArg string
+		if len(args) < 1 {
+			firstArg = "ncep"
+		} else {
+			firstArg = args[0]
+		}
+		if strings.EqualFold("ncep", firstArg) {
 			defaultParams := gfs.Params{
 				Resolution: gfs.OneDegree,
 				DateRange: &gfs.DateRange{

@@ -87,6 +87,8 @@ func getRepository(rt RepositoryType) Repository {
 	return nil
 }
 
+// TODO: Reimplement below
+
 // func init() {
 // flag.StringVar(&startDate, "b", "2006-01-02", "begin date <YYYY-MM-DD>")
 // flag.StringVar(&endDate, "e", "2014-01-02", "end date <YYYY-MM-DD>")
