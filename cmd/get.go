@@ -23,18 +23,44 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"strings"
+	"time"
 
+	"github.com/azillion/nimbus/gfs"
 	"github.com/spf13/cobra"
 )
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get",
+	Use:   "get [data source]",
 	Short: "Get files from NOMADS.",
 	Long:  `Download files from NOMADS`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires a data source argument")
+		}
+		if strings.EqualFold("ncep", args[0]) {
+			return nil
+		}
+		return fmt.Errorf("invalid data source specified: %s", args[0])
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("get called")
+		if strings.EqualFold("ncep", args[0]) {
+			fmt.Println("ncep called")
+			defaultParams := gfs.Params{
+				Resolution: gfs.OneDegree,
+				DateRange: &gfs.DateRange{
+					Start: time.Now().AddDate(0, 0, -8),
+					End:   time.Now(),
+				},
+				TimeFrame: gfs.AllTimeFrames,
+			}
+			gfs.GetFiles(gfs.NCEPRepoType, &defaultParams)
+		} else {
+			fmt.Println("get called")
+		}
 	},
 }
 
@@ -49,5 +75,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// getCmd.Flags().StringVarP(&configFilePath, "file", "f", "", "path to data request parameters file")
 }
