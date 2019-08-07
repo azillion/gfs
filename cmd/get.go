@@ -23,12 +23,14 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/azillion/nimbus/gfs"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // getCmd represents the get command
@@ -38,31 +40,37 @@ var getCmd = &cobra.Command{
 	Long:  `Download files from NOMADS`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			// return errors.New("requires a data source argument")
-			return nil
+			return errors.New("requires a data source argument")
 		}
-		if strings.EqualFold("ncep", args[0]) {
+		if strings.EqualFold("gfs", args[0]) {
 			return nil
 		}
 		return fmt.Errorf("invalid data source specified: %s", args[0])
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var firstArg string
-		if len(args) < 1 {
-			firstArg = "ncep"
-		} else {
-			firstArg = args[0]
-		}
-		if strings.EqualFold("ncep", firstArg) {
-			defaultParams := gfs.Params{
-				Resolution: gfs.OneDegree,
-				DateRange: &gfs.DateRange{
+		if strings.EqualFold("gfs", args[0]) {
+			params := gfs.Params{
+				RepositoryType: gfs.NCEPRepoType,
+				Resolution:     gfs.OneDegree,
+				DateRange: gfs.DateRange{
 					Start: time.Now().AddDate(0, 0, -8),
 					End:   time.Now(),
 				},
 				TimeFrame: gfs.AllTimeFrames,
 			}
-			gfs.GetFiles(gfs.NCEPRepoType, &defaultParams)
+			var dateRangeStrings gfs.DateRangeStrings
+			err := viper.Unmarshal(&params)
+			if err != nil {
+				panic(err)
+			}
+			err = viper.UnmarshalKey("date_range", &dateRangeStrings)
+			if err != nil {
+				panic(err)
+			}
+			params.DateRange.LoadFromStrings(dateRangeStrings.Start, dateRangeStrings.End)
+			fmt.Println(params)
+			gfsService := gfs.NewService(&params)
+			gfsService.GetFiles()
 		} else {
 			fmt.Println("get called")
 		}
@@ -80,5 +88,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// getCmd.Flags().StringVarP(&configFilePath, "file", "f", "", "path to data request parameters file")
+	getCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is ./get-config.nimbus.yaml)")
 }

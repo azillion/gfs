@@ -1,0 +1,6 @@
+repository_type: "NCEP"
+resolution: "1p00"
+date_range:
+  start: "2019-08-01"
+  end: "2019-08-03"
+time_frame: "00"

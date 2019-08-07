@@ -174,14 +174,14 @@ func (ncep *NCEPRepository) buildURI(date string, timeFrame TimeFrame, fs FileSu
 	regionURI := ncep.region.ToURI()
 	dirURI := fmt.Sprintf(dirURIFormat, date, timeFrame)
 	URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, levelURI, climateVariableURI, regionURI, dirURI)
-	fmt.Println(URI)
+	// fmt.Println(URI)
 	return URI
 }
 
 // LoadParams reads the param object into the repository
 func (ncep *NCEPRepository) LoadParams(p *Params) error {
 	ncep.resolution = p.Resolution
-	ncep.dateRange = *p.DateRange
+	ncep.dateRange = p.DateRange
 	return nil
 }
 
