@@ -68,10 +68,11 @@ type TimeFrame string
 
 // Params used when downloading grib2 GFS files
 type Params struct {
-	RepositoryType RepositoryType `mapstructure:"repository_type"`
-	Resolution     Resolution     `mapstructure:"resolution"`
-	DateRange      DateRange
-	TimeFrame      TimeFrame `mapstructure:"time_frame"`
+	RepositoryType             RepositoryType `mapstructure:"repository_type"`
+	Resolution                 Resolution     `mapstructure:"resolution"`
+	DateRange                  DateRange
+	TimeFrame                  TimeFrame `mapstructure:"time_frame"`
+	IsAdditionalPrecipIncluded bool      `mapstructure:"is_additional_precipitation_included"`
 }
 
 // Repository interface for different NOMADS file servers

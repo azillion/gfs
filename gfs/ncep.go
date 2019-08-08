@@ -51,10 +51,10 @@ type NCEPRepository struct {
 	dateRange  DateRange
 
 	// params
-	levels                   map[levelKey]Level
-	levelsURICache           string
-	climateVariables         map[climateVariableKey]ClimateVariable
-	climateVariablesURICache string
+	levels                     map[levelKey]Level
+	levelsURICache             string
+	climateVariables           map[climateVariableKey]ClimateVariable
+	climateVariablesURICache   string
 
 	region Region
 

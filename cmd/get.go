@@ -28,6 +28,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/azillion/nimbus/gfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,31 +51,11 @@ var getCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if strings.EqualFold("gfs", args[0]) {
-			params := gfs.Params{
-				RepositoryType: gfs.NCEPRepoType,
-				Resolution:     gfs.OneDegree,
-				DateRange: gfs.DateRange{
-					Start: time.Now().AddDate(0, 0, -8),
-					End:   time.Now(),
-				},
-				TimeFrame: gfs.AllTimeFrames,
-			}
-			var dateRangeStrings gfs.DateRangeStrings
-			err := viper.Unmarshal(&params)
-			if err != nil {
-				panic(err)
-			}
-			err = viper.UnmarshalKey("date_range", &dateRangeStrings)
-			if err != nil {
-				panic(err)
-			}
-			params.DateRange.LoadFromStrings(dateRangeStrings.Start, dateRangeStrings.End)
-			fmt.Println(params)
-			gfsService := gfs.NewService(&params)
-			gfsService.GetFiles()
-		} else {
-			fmt.Println("get called")
+			handleGFSDataSource()
+			return
 		}
+
+		logrus.Infof("no valid data source provided: %s", args[0])
 	},
 }
 
@@ -89,4 +71,43 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	getCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is ./get-config.nimbus.yaml)")
+}
+
+func parseConfigFile() (*gfs.Params, error) {
+	params := gfs.Params{
+		RepositoryType: gfs.NCEPRepoType,
+		Resolution:     gfs.OneDegree,
+		DateRange: gfs.DateRange{
+			Start: time.Now().AddDate(0, 0, -8),
+			End:   time.Now(),
+		},
+		TimeFrame: gfs.AllTimeFrames,
+		IsAdditionalPrecipIncluded: false,
+	}
+	err := viper.Unmarshal(&params)
+	if err != nil {
+		return nil, err
+	}
+
+	var dateRangeStrings gfs.DateRangeStrings
+	err = viper.UnmarshalKey("date_range", &dateRangeStrings)
+	if err != nil {
+		return nil, err
+	}
+
+	params.DateRange.LoadFromStrings(dateRangeStrings.Start, dateRangeStrings.End)
+	logrus.Debug(params)
+
+	return &params, nil
+}
+
+func handleGFSDataSource() error {
+	params, err := parseConfigFile()
+	if err != nil {
+		return err
+	}
+	gfsService := gfs.NewService(params)
+	gfsService.GetFiles()
+
+	return nil
 }

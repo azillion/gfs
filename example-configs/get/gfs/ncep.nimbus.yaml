@@ -1,0 +1,38 @@
+## Example GFS NCEP Config 
+
+## Repository Type
+## "NCEP" or "NCDC"
+## NCEP https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl
+## NCDC https://nomads.ncdc.noaa.gov/data/
+repository_type: "NCEP"
+
+## Date Range
+## Sets the range of dates to download
+date_range:
+  start: "2019-08-01"
+  end: "2019-08-03"
+
+## Time Frame
+## "00", "06", "12", "18", "99"
+## Midnight, 6 am, Noon, 6 pm, and all time frames
+time_frame: "99"
+
+## Resolution
+## "1p00", "0p50", "0p25"
+## 1.0, 0.50, and 0.25 degrees
+## Only applicable to NCEP repo type
+resolution: "1p00"
+
+## Are Additional Precipitation Files Included
+## https://www.ncdc.noaa.gov/data-access/model-data/model-datasets/global-forcast-system-gfs
+## Under the Output Timesteps Column
+## Downloads 2 extra files for each time frame
+## **Only applicable to NCDC repo type**
+# is_additional_precipitation_included: false
+
+## Additional NCDC Data Sources
+## https://nomads.ncdc.noaa.gov/data/
+## if added to, files will be downloaded from the data source if supported
+## **Only applicable to NCDC repo type**
+# additional_ncdc_data_sources:
+#   - "gfs4"
