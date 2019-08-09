@@ -24,6 +24,9 @@ const (
 	AllTimeFrames TimeFrame = "99"
 )
 
+// FileSuffix is the final part of the filename
+type FileSuffix string
+
 // Resolution is the degree of resolution for the GFS data
 type Resolution string
 
@@ -60,37 +63,16 @@ type TimeFrame string
 // Params used when downloading grib2 GFS files
 type Params struct {
 	RepositoryType             RepositoryType `mapstructure:"repository_type"`
-	Resolution                 Resolution                `mapstructure:"resolution"`
+	Resolution                 Resolution     `mapstructure:"resolution"`
 	DateRange                  DateRange
 	TimeFrame                  TimeFrame `mapstructure:"time_frame"`
 	IsAdditionalPrecipIncluded bool      `mapstructure:"is_additional_precipitation_included"`
-	AdditionalNCDCDataSources  []string  `mapstructure:"additional_ncdc_data_sources"`
 }
 
 // TODO: Reimplement below
 
-// func init() {
-// flag.StringVar(&startDate, "b", "2006-01-02", "begin date <YYYY-MM-DD>")
-// flag.StringVar(&endDate, "e", "2014-01-02", "end date <YYYY-MM-DD>")
-// flag.StringVar(&outputFolder, "o", "./", "output folder")
-// }
-
 // func main() {
 // flag.Parse()
-
-// start, err := time.Parse(inputDateLayout, startDate)
-// if err != nil {
-// 	panic(err)
-// }
-// dataTime := start
-
-// end, err := time.Parse(inputDateLayout, endDate)
-// if err != nil {
-// 	panic(err)
-// }
-// if end.Sub(time.Now()) > 0 {
-// 	panic("end date can not be in the future")
-// }
 
 // err = os.Chdir(outputFolder)
 // if err != nil {
@@ -120,29 +102,6 @@ type Params struct {
 // 		dataTime = increTime(dataTime)
 // 	}
 // }
-// }
-
-// func saveData(fileName string, data []byte) {
-// 	saveFile, err := os.Create(fileName)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	_, err = saveFile.Write(data)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	err = saveFile.Sync()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	err = saveFile.Close()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("saved %s\n", saveFile.Name())
 // }
 
 // func getData(t time.Time, s string) []byte {

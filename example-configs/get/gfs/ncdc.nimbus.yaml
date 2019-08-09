@@ -11,6 +11,7 @@ repository_type: "NCDC"
 
 ## Date Range
 ## Sets the range of dates to download
+## inclusive start date and exclusive end date <start date, end date)
 date_range:
   start: "2019-08-01"
   end: "2019-08-03"
@@ -20,12 +21,6 @@ date_range:
 ## Midnight, 6 am, Noon, 6 pm, and all time frames
 time_frame: "99"
 
-## Resolution
-## "1p00", "0p50", "0p25"
-## 1.0, 0.50, and 0.25 degrees
-## Only applicable to NCEP repo type
-# resolution: "1p00"
-
 ## Are Additional Precipitation Files Included
 ## https://www.ncdc.noaa.gov/data-access/model-data/model-datasets/global-forcast-system-gfs
 ## Under the Output Timesteps Column
@@ -33,9 +28,6 @@ time_frame: "99"
 ## **Only applicable to NCDC repo type**
 is_additional_precipitation_included: true
 
-## Additional NCDC Data Sources
-## https://nomads.ncdc.noaa.gov/data/
-## if added to, files will be downloaded from the data source if supported
-## **Only applicable to NCDC repo type**
-additional_ncdc_data_sources:
-  - "gfs4"
+## Output Folder
+## **Default is current working directory**
+output_folder: "./out"

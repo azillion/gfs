@@ -23,17 +23,18 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/azillion/nimbus/gfs"
+	"github.com/azillion/nimbus/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var outputFolder string
 
 var defaultParams = &gfs.Params{
 	RepositoryType: gfs.NCEPRepoType,
@@ -48,20 +49,27 @@ var defaultParams = &gfs.Params{
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get [data source]",
+	Use:   "get [config file]",
 	Short: "Get files from NOMADS.",
 	Long:  `Download files from NOMADS`,
-	Args: func(cmd *cobra.Command, args []string) error {
+	Args:  cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if debug {
+			logrus.SetLevel(logrus.DebugLevel)
+		}
 		if len(args) < 1 {
-			return errors.New("requires a config file")
+			logrus.Fatal("requires a config file")
 		}
-		if gfs.FileExists(args[0]) {
-			return nil
+		if util.FileExists(args[0]) {
+			cfgFile = args[0]
+			initConfig()
+		} else {
+			logrus.Fatal("config file does not exist or is unreadable: %s", args[0])
 		}
-		return fmt.Errorf("config file does not exist or is unreadable: %s", args[0])
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataSource := viper.GetString("data_source")
+		logrus.Debug(dataSource)
 		if strings.EqualFold(dataSource, "gfs") {
 			err := handleGFSDataSource()
 			if err != nil {
@@ -69,8 +77,7 @@ var getCmd = &cobra.Command{
 			}
 			return
 		}
-
-		logrus.Infof("no valid data source provided: %s", args[0])
+		logrus.Infof("no valid config file provided: %s", cfgFile)
 	},
 }
 
@@ -85,7 +92,11 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	getCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is ./get-config.nimbus.yaml)")
+	// getCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (required)")
+	// getCmd.MarkFlagRequired("config")
+
+	getCmd.Flags().StringVarP(&outputFolder, "output-folder", "o", "", "output folder (default is working directory)")
+	viper.BindPFlag("output_folder", getCmd.Flags().Lookup("output-folder"))
 }
 
 func parseConfigFile() (*gfs.Params, error) {

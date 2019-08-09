@@ -54,13 +54,14 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		logrus.Error(err)
-		os.Exit(1)
+		logrus.Fatal(err)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "print debug")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -70,10 +71,6 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "print debug")
-	if debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -82,12 +79,9 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		// home, err := homedir.Dir()
 		dir, err := os.Getwd()
 		if err != nil {
-			logrus.Error(err)
-			os.Exit(1)
+			logrus.Fatal(err)
 		}
 
 		// Search config in home directory with name ".nimbus" (without extension).

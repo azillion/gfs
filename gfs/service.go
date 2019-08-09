@@ -1,7 +1,7 @@
 package gfs
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 )
 
 // Service holds the repository and params of the service
@@ -10,14 +10,19 @@ type Service struct {
 	params     *Params
 }
 
-// GetFiles get files from NOMADS
+// GetFiles from NOMADS
 func (s *Service) GetFiles() error {
-	if s.params.TimeFrame == AllTimeFrames {
-		_, err := s.repository.GetURIs()
-		if err != nil {
-			panic(err)
-		}
+	baseURL, err := s.repository.GetBaseURL()
+	if err != nil {
+		logrus.Fatal(err)
 	}
+	logrus.Debug(baseURL)
+
+	_, err = s.repository.GetURIs()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
 	return nil
 }
 
@@ -25,11 +30,11 @@ func (s *Service) GetFiles() error {
 func NewService(p *Params) *Service {
 	r := NewRepository(p.RepositoryType)
 	if r == nil {
-		panic(fmt.Errorf("no repository of that type"))
+		logrus.Fatal("no repository of that type")
 	}
 	err := r.LoadParams(p)
 	if err != nil {
-		panic(fmt.Errorf("error loading params: %v", err))
+		logrus.Fatalf("error loading params: %v", err)
 	}
 	return &Service{
 		repository: r,

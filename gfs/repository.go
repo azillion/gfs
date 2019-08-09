@@ -1,5 +1,10 @@
 package gfs
 
+import (
+	"math"
+	"time"
+)
+
 const (
 	// NCEPRepoType get files from NCEP
 	NCEPRepoType RepositoryType = "NCEP"
@@ -27,4 +32,27 @@ func NewRepository(rt RepositoryType) Repository {
 		return nil
 	}
 	return nil
+}
+
+// allTimeFrames returns a slice of all time frames
+func allTimeFrames() []TimeFrame {
+	timeFrames := []TimeFrame{Zulu, ZeroSixHundredHours, TwelveHundredHours, EighteenHundredHours}
+	return timeFrames
+}
+
+func getTimeFrames(tf TimeFrame) []TimeFrame {
+	// create range of time frames
+	var timeFrames []TimeFrame
+	if tf == AllTimeFrames {
+		timeFrames = allTimeFrames()
+	} else {
+		timeFrames = []TimeFrame{tf}
+	}
+	return timeFrames
+}
+
+func getNumberOfLoops(start, end time.Time) int {
+	loops := end.Sub(start).Hours() / 24
+	loops = math.Floor(loops)
+	return int(loops)
 }

@@ -3,6 +3,8 @@ package gfs
 import (
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -13,15 +15,11 @@ const (
 	maxFRange int = 128
 )
 
-type levelKey string
-
 // Level is a region at a certain altitude
 type Level struct {
 	uriKey     string
 	isIncluded bool
 }
-
-type climateVariableKey string
 
 // ClimateVariable is a portion of GRIB2 climate data
 type ClimateVariable struct {
@@ -29,36 +27,29 @@ type ClimateVariable struct {
 	isIncluded bool
 }
 
-// Region contains the region of the data
-type Region struct {
-	LeftLon   float32
-	RightLon  float32
-	TopLat    float32
-	BottomLat float32
-}
-
-// ToURI returns a URI string of the region
-func (r *Region) ToURI() string {
-	return fmt.Sprintf("leftlon=%1.2f&rightlon=%1.2f&toplat=%1.2f&bottomlat=%1.2f", r.LeftLon, r.RightLon, r.TopLat, r.BottomLat)
-}
-
-// FileSuffix is the final part of the filename
-type FileSuffix string
-
 // NCEPRepository holds the data that constructs the URL
 type NCEPRepository struct {
 	resolution Resolution
 	dateRange  DateRange
+	timeFrames []TimeFrame
 
 	// params
-	levels                   map[levelKey]Level
+	levels                   map[string]Level
 	levelsURICache           string
-	climateVariables         map[climateVariableKey]ClimateVariable
+	climateVariables         map[string]ClimateVariable
 	climateVariablesURICache string
 
 	region Region
 
 	URIs []string
+}
+
+// LoadParams reads the param object into the repository
+func (ncep *NCEPRepository) LoadParams(p *Params) error {
+	ncep.resolution = p.Resolution
+	ncep.dateRange = p.DateRange
+	ncep.timeFrames = getTimeFrames(p.TimeFrame)
+	return nil
 }
 
 // GetBaseURL gets the base URL of the repository
@@ -71,13 +62,15 @@ func (ncep *NCEPRepository) GetBaseURL() (string, error) {
 
 // GetURIs get the URIs
 func (ncep *NCEPRepository) GetURIs() ([]string, error) {
+	ncep.URIs = ncep.URIs[:0]
+
 	if ncep.dateRange.End.Sub(time.Now()) > 0 {
-		panic("end date can not be in the future")
+		return nil, fmt.Errorf("end date can not be in the future")
 	}
 
+	loops := getNumberOfLoops(ncep.dateRange.Start, ncep.dateRange.End)
 	d := ncep.dateRange.Start
-	end := ncep.dateRange.End
-	for end.Sub(d).Hours() > 24 {
+	for i := 0; i < loops; i++ {
 		date := d.Format("20060102")
 		_, err := ncep.GetURIsForDate(date)
 		if err != nil {
@@ -91,52 +84,51 @@ func (ncep *NCEPRepository) GetURIs() ([]string, error) {
 
 // GetURIsForDate get the URIs for a specific date
 func (ncep *NCEPRepository) GetURIsForDate(date string) ([]string, error) {
-	return ncep.GetURIsForDateAndTime(date, AllTimeFrames)
+	ncep.URIs = ncep.URIs[:0]
+	// loop through the time frames and build the URIs for each
+	for _, tf := range ncep.timeFrames {
+		_, err := ncep.GetURIsForDateAndTime(date, tf)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return ncep.URIs, nil
 }
 
 // GetURIsForDateAndTime get the URIs for a specific date and time frame
 func (ncep *NCEPRepository) GetURIsForDateAndTime(date string, timeFrame TimeFrame) ([]string, error) {
-	if _, err := ncep.GetBaseURL(); err != nil {
-		return nil, fmt.Errorf("failed to get the base url")
-	}
-
-	if len(ncep.URIs) > 0 {
-		return ncep.URIs, nil
-	}
+	ncep.URIs = ncep.URIs[:0]
 
 	// build .anl URI since it's unique
 	anlURI := ncep.buildURI(date, timeFrame, "anl")
 	ncep.URIs = append(ncep.URIs, anlURI)
 
-	// create range of time frames
-	var timeFrames []TimeFrame
-	if timeFrame == AllTimeFrames {
-		timeFrames = append(timeFrames, Zulu)
-		timeFrames = append(timeFrames, ZeroSixHundredHours)
-		timeFrames = append(timeFrames, TwelveHundredHours)
-		timeFrames = append(timeFrames, EighteenHundredHours)
-	} else {
-		timeFrames = append(timeFrames, timeFrame)
-	}
+	// build the f URIs
+	for i := 0; i <= maxFRange; i++ {
+		f := i * 3
+		// build the file suffix
+		suffix := FileSuffix(fmt.Sprintf("f%03d", f))
 
-	// loop through the time frames and build the URIs for each
-	for _, tf := range timeFrames {
-		// build the f URIs
-		for i := 0; i <= maxFRange; i++ {
-			f := i * 3
-			// build the file suffix
-			var suffix FileSuffix
-			suffix = FileSuffix(fmt.Sprintf("f%03d", f))
+		// build the URI
+		fURI := ncep.buildURI(date, timeFrame, suffix)
 
-			// build the URI
-			fURI := ncep.buildURI(date, tf, suffix)
-
-			// add the URI to the URIs slice
-			ncep.URIs = append(ncep.URIs, fURI)
-		}
+		// add the URI to the URIs slice
+		ncep.URIs = append(ncep.URIs, fURI)
 	}
 
 	return ncep.URIs, nil
+}
+
+func (ncep *NCEPRepository) buildURI(date string, timeFrame TimeFrame, fs FileSuffix) string {
+	fileURI := fmt.Sprintf(ncepFileURIFormat, timeFrame, ncep.resolution, fs)
+	levelURI := ncep.getLevels()
+	climateVariableURI := ncep.getClimateVariables()
+	regionURI := ncep.region.ToURI()
+	dirURI := fmt.Sprintf(ncepDirURIFormat, date, timeFrame)
+
+	URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, levelURI, climateVariableURI, regionURI, dirURI)
+	logrus.Debug(URI)
+	return URI
 }
 
 func (ncep *NCEPRepository) getLevels() string {
@@ -165,32 +157,4 @@ func (ncep *NCEPRepository) getClimateVariables() string {
 	// TODO: Read vars from csv file
 	// TODO: Read config for which vars to enable
 	return ""
-}
-
-func (ncep *NCEPRepository) buildURI(date string, timeFrame TimeFrame, fs FileSuffix) string {
-	fileURI := fmt.Sprintf(ncepFileURIFormat, timeFrame, ncep.resolution, fs)
-	levelURI := ncep.getLevels()
-	climateVariableURI := ncep.getClimateVariables()
-	regionURI := ncep.region.ToURI()
-	dirURI := fmt.Sprintf(ncepDirURIFormat, date, timeFrame)
-	URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, levelURI, climateVariableURI, regionURI, dirURI)
-	// fmt.Println(URI)
-	return URI
-}
-
-// LoadParams reads the param object into the repository
-func (ncep *NCEPRepository) LoadParams(p *Params) error {
-	ncep.resolution = p.Resolution
-	ncep.dateRange = p.DateRange
-	return nil
-}
-
-// FullEarthRegion returns a region the full size of Earth
-func FullEarthRegion() *Region {
-	return &Region{
-		LeftLon:   0.0,
-		RightLon:  360.0,
-		TopLat:    90.0,
-		BottomLat: -90.0,
-	}
 }
