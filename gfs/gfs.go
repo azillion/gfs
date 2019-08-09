@@ -1,16 +1,10 @@
 package gfs
 
 import (
-	"fmt"
 	"time"
 )
 
 const (
-	// NCEPRepoType get files from NCEP
-	NCEPRepoType RepositoryType = "NCEP"
-	// NCDCRepoType get files from NCDC
-	NCDCRepoType RepositoryType = "NCDC"
-
 	// OneDegree 1.0 Degree of Longitudinal Resolution
 	OneDegree Resolution = "1p00"
 	// ZeroPointFiveDegree 0.5 Degrees of Longitudinal Resolution
@@ -29,9 +23,6 @@ const (
 	// AllTimeFrames self explanitory
 	AllTimeFrames TimeFrame = "99"
 )
-
-// RepositoryType the type of repository being accessed
-type RepositoryType string
 
 // Resolution is the degree of resolution for the GFS data
 type Resolution string
@@ -69,61 +60,11 @@ type TimeFrame string
 // Params used when downloading grib2 GFS files
 type Params struct {
 	RepositoryType             RepositoryType `mapstructure:"repository_type"`
-	Resolution                 Resolution     `mapstructure:"resolution"`
+	Resolution                 Resolution                `mapstructure:"resolution"`
 	DateRange                  DateRange
 	TimeFrame                  TimeFrame `mapstructure:"time_frame"`
 	IsAdditionalPrecipIncluded bool      `mapstructure:"is_additional_precipitation_included"`
-}
-
-// Repository interface for different NOMADS file servers
-type Repository interface {
-	GetBaseURL() (string, error)
-	GetURIs() ([]string, error)
-	GetURIsForDate(date string) ([]string, error)
-	GetURIsForDateAndTime(date string, timeFrame TimeFrame) ([]string, error)
-	LoadParams(*Params) error
-}
-
-// Service holds the repository and params of the service
-type Service struct {
-	repository Repository
-	params     *Params
-}
-
-// GetFiles get files from NOMADS
-func (s *Service) GetFiles() error {
-	if s.params.TimeFrame == AllTimeFrames {
-		_, err := s.repository.GetURIs()
-		if err != nil {
-			panic(err)
-		}
-	}
-	return nil
-}
-
-// NewService creates a new gfs service
-func NewService(p *Params) *Service {
-	r := getRepository(p.RepositoryType)
-	if r == nil {
-		panic(fmt.Errorf("no repository of that type"))
-	}
-	err := r.LoadParams(p)
-	if err != nil {
-		panic(fmt.Errorf("error loading params: %v", err))
-	}
-	return &Service{
-		repository: r,
-		params:     p,
-	}
-}
-
-func getRepository(rt RepositoryType) Repository {
-	if rt == NCEPRepoType {
-		return new(NCEPRepository)
-	} else if rt == NCDCRepoType {
-		return nil
-	}
-	return nil
+	AdditionalNCDCDataSources  []string  `mapstructure:"additional_ncdc_data_sources"`
 }
 
 // TODO: Reimplement below

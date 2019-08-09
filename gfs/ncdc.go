@@ -6,13 +6,10 @@ import (
 )
 
 const (
-	baseURLFormat string = "https://nomads.ncdc.noaa.gov/data/"
-	fileURIFormat string = "gfs.t%sz.pgrb2.%s.%s" // time, resolution, anl/filesuffix
-	dirURIFormat  string = "%%2Fgfs.%s%%2F%s"     // date of data, time frame of data
+	ncdcBaseURLFormat string = "https://nomads.ncdc.noaa.gov/data/"
+	fileURIFormat     string = "gfs.t%sz.pgrb2.%s.%s" // time, resolution, anl/filesuffix
+	dirURIFormat      string = "%%2Fgfs.%s%%2F%s"     // date of data, time frame of data
 )
-
-// FileSuffix is the final part of the filename
-type FileSuffix string
 
 // NCDCRepository holds the data that constructs the URL
 type NCDCRepository struct {
@@ -24,7 +21,7 @@ type NCDCRepository struct {
 
 // GetBaseURL gets the base URL of the repository
 func (ncdc *NCDCRepository) GetBaseURL() (string, error) {
-	return fmt.Sprintf(baseURLFormat, ncdc.resolution), nil
+	return fmt.Sprintf(ncdcBaseURLFormat), nil
 }
 
 // GetURIs get the URIs
@@ -98,14 +95,12 @@ func (ncdc *NCDCRepository) GetURIsForDateAndTime(date string, timeFrame TimeFra
 }
 
 func (ncdc *NCDCRepository) buildURI(date string, timeFrame TimeFrame, fs FileSuffix) string {
-	fileURI := fmt.Sprintf(fileURIFormat, timeFrame, ncdc.resolution, fs)
-	levelURI := ncdc.getLevels()
-	climateVariableURI := ncdc.getClimateVariables()
-	regionURI := ncdc.region.ToURI()
-	dirURI := fmt.Sprintf(dirURIFormat, date, timeFrame)
-	URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, levelURI, climateVariableURI, regionURI, dirURI)
+	// fileURI := fmt.Sprintf(fileURIFormat, timeFrame, ncdc.resolution, fs)
+	// dirURI := fmt.Sprintf(dirURIFormat, date, timeFrame)
+	// URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, dirURI)
 	// fmt.Println(URI)
-	return URI
+	// return URI
+	return ""
 }
 
 // LoadParams reads the param object into the repository

@@ -35,6 +35,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+var defaultParams = &gfs.Params{
+	RepositoryType: gfs.NCEPRepoType,
+	Resolution:     gfs.OneDegree,
+	DateRange: gfs.DateRange{
+		Start: time.Now().AddDate(0, 0, -8),
+		End:   time.Now(),
+	},
+	TimeFrame:                  gfs.AllTimeFrames,
+	IsAdditionalPrecipIncluded: false,
+}
+
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get [data source]",
@@ -42,16 +53,20 @@ var getCmd = &cobra.Command{
 	Long:  `Download files from NOMADS`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("requires a data source argument")
+			return errors.New("requires a config file")
 		}
-		if strings.EqualFold("gfs", args[0]) {
+		if gfs.FileExists(args[0]) {
 			return nil
 		}
-		return fmt.Errorf("invalid data source specified: %s", args[0])
+		return fmt.Errorf("config file does not exist or is unreadable: %s", args[0])
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if strings.EqualFold("gfs", args[0]) {
-			handleGFSDataSource()
+		dataSource := viper.GetString("data_source")
+		if strings.EqualFold(dataSource, "gfs") {
+			err := handleGFSDataSource()
+			if err != nil {
+				logrus.Fatal(err)
+			}
 			return
 		}
 
@@ -74,27 +89,21 @@ func init() {
 }
 
 func parseConfigFile() (*gfs.Params, error) {
-	params := gfs.Params{
-		RepositoryType: gfs.NCEPRepoType,
-		Resolution:     gfs.OneDegree,
-		DateRange: gfs.DateRange{
-			Start: time.Now().AddDate(0, 0, -8),
-			End:   time.Now(),
-		},
-		TimeFrame: gfs.AllTimeFrames,
-		IsAdditionalPrecipIncluded: false,
-	}
+	// unmarshal the config file over the default params
+	params := *defaultParams
 	err := viper.Unmarshal(&params)
 	if err != nil {
 		return nil, err
 	}
 
+	// parse the date values to strings
 	var dateRangeStrings gfs.DateRangeStrings
 	err = viper.UnmarshalKey("date_range", &dateRangeStrings)
 	if err != nil {
 		return nil, err
 	}
 
+	// convert the date range strings to time.Time and load them into the params
 	params.DateRange.LoadFromStrings(dateRangeStrings.Start, dateRangeStrings.End)
 	logrus.Debug(params)
 
@@ -102,11 +111,17 @@ func parseConfigFile() (*gfs.Params, error) {
 }
 
 func handleGFSDataSource() error {
+	// parse the config file
 	params, err := parseConfigFile()
 	if err != nil {
 		return err
 	}
+	logrus.Debug("parsed the config file")
+
+	// create a new gfs service
 	gfsService := gfs.NewService(params)
+	logrus.Debug("created a new GFS service")
+
 	gfsService.GetFiles()
 
 	return nil

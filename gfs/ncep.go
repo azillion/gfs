@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	baseURLFormat string = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_%s.pl" // resolution
-	fileURIFormat string = "gfs.t%sz.pgrb2.%s.%s"                                  // time, resolution, anl/filesuffix
-	dirURIFormat  string = "%%2Fgfs.%s%%2F%s"                                      // date of data, time frame of data
+	ncepBaseURLFormat string = "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_%s.pl" // resolution
+	ncepFileURIFormat string = "gfs.t%sz.pgrb2.%s.%s"                                  // time, resolution, anl/filesuffix
+	ncepDirURIFormat  string = "%%2Fgfs.%s%%2F%s"                                      // date of data, time frame of data
 
 	maxFRange int = 128
 )
@@ -51,10 +51,10 @@ type NCEPRepository struct {
 	dateRange  DateRange
 
 	// params
-	levels                     map[levelKey]Level
-	levelsURICache             string
-	climateVariables           map[climateVariableKey]ClimateVariable
-	climateVariablesURICache   string
+	levels                   map[levelKey]Level
+	levelsURICache           string
+	climateVariables         map[climateVariableKey]ClimateVariable
+	climateVariablesURICache string
 
 	region Region
 
@@ -66,7 +66,7 @@ func (ncep *NCEPRepository) GetBaseURL() (string, error) {
 	if ncep.resolution == "" {
 		return "", fmt.Errorf("no resolution set")
 	}
-	return fmt.Sprintf(baseURLFormat, ncep.resolution), nil
+	return fmt.Sprintf(ncepBaseURLFormat, ncep.resolution), nil
 }
 
 // GetURIs get the URIs
@@ -168,11 +168,11 @@ func (ncep *NCEPRepository) getClimateVariables() string {
 }
 
 func (ncep *NCEPRepository) buildURI(date string, timeFrame TimeFrame, fs FileSuffix) string {
-	fileURI := fmt.Sprintf(fileURIFormat, timeFrame, ncep.resolution, fs)
+	fileURI := fmt.Sprintf(ncepFileURIFormat, timeFrame, ncep.resolution, fs)
 	levelURI := ncep.getLevels()
 	climateVariableURI := ncep.getClimateVariables()
 	regionURI := ncep.region.ToURI()
-	dirURI := fmt.Sprintf(dirURIFormat, date, timeFrame)
+	dirURI := fmt.Sprintf(ncepDirURIFormat, date, timeFrame)
 	URI := fmt.Sprintf("?file=%s&%s&%s&%s&%s", fileURI, levelURI, climateVariableURI, regionURI, dirURI)
 	// fmt.Println(URI)
 	return URI

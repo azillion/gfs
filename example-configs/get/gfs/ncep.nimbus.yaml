@@ -1,5 +1,8 @@
 ## Example GFS NCEP Config 
 
+## Data Source
+data_source: "gfs"
+
 ## Repository Type
 ## "NCEP" or "NCDC"
 ## NCEP https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl
