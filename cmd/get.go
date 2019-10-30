@@ -83,18 +83,6 @@ var getCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(getCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (required)")
-	// getCmd.MarkFlagRequired("config")
-
 	getCmd.Flags().StringVarP(&outputFolder, "output-folder", "o", "", "output folder (default is working directory)")
 	viper.BindPFlag("output_folder", getCmd.Flags().Lookup("output-folder"))
 }
