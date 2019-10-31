@@ -26,5 +26,6 @@ import "github.com/azillion/nimbus/cmd"
 func main() {
 	fmt.Println("Starting the Nimbus Matrix...")
 	fmt.Println("The Great Nimbus is thinking...")
+	fmt.Println(2+2)
 	cmd.Execute()
 }
