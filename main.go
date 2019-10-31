@@ -24,5 +24,6 @@ package main
 import "github.com/azillion/nimbus/cmd"
 
 func main() {
+	fmt.Println("Starting the Nimbus Matrix...")
 	cmd.Execute()
 }
