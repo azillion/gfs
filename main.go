@@ -27,5 +27,7 @@ func main() {
 	fmt.Println("Starting the Nimbus Matrix...")
 	fmt.Println("The Great Nimbus is thinking...")
 	fmt.Println(2+2)
+	fmt.Println("Equals fish NOT four! The compiler must be wrong...")
+	fmt.Println("Anyways, Nimbus starting now...")
 	cmd.Execute()
 }
